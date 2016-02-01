@@ -2,6 +2,29 @@ import os
 
 pad = "    "
 quitStrings = ["exit", "quit", "q"]
+kill = False
+response = None
+mode = 'rps'
+modes = ('rps', 'rpsls')
+
+rulesRPS = [
+    ('rock', 'crushes', 'scissors'),
+    ('paper', 'covers', 'rock'),
+    ('scissors', 'cuts', 'paper')
+]
+
+rulesRPSLS = [
+    ('rock', 'crushes', 'scissors'),
+    ('paper', 'covers', 'rock'),
+    ('scissors', 'cuts', 'paper'),
+    ('lizard', 'poisons', 'spock'),
+    ('spock', 'smashes', 'scissors'),
+    ('rock', 'crushes', 'lizard'),
+    ('scissors', 'decapitates', 'lizard'),
+    ('lizard', 'eats', 'paper'),
+    ('paper', 'disproves', 'spock'),
+    ('spock', 'vaporizes', 'rock')
+]
 
 def paddedPrint(message):
     print (pad + message)
@@ -32,7 +55,7 @@ def inputToLower():
     return str.lower(input('    '))
     
 def printResults():
-    paddedPrint ("You responded " + response)
+    paddedPrint ("You responded " + response + "\n")
     
 def getValidMoves(rules):
     validMoves = []
@@ -41,40 +64,41 @@ def getValidMoves(rules):
             validMoves.append(x)
             
     return validMoves
-        
     
 def printPrompt():
-    if response and not kill:
+    if response and validateInput(response) and not kill:
         printResults()
     
-    paddedPrint ("You are play")
+    if mode == 'rps':
+        paddedPrint ("You are playing 'Rock, Paper, Scissors.'")
+    elif mode == 'rpsls':
+        paddedPrint ("You are playing 'Rock, Paper, Scissors, Lizard, Spock.'")
+    else:
+        paddedPrint ("I'm not sure what you're doing.")
+        
+    paddedPrint ("Please enter your move, or 'mode' to switch modes.")
+    
+def switchModes(currentMode):
+    newMode = None
+    newValidMoves = None
+    newRules = None
+    
+    if currentMode == 'rps':
+        newMode = 'rpsls'
+        newRules = rulesRPSLS
+    else:
+        newMode = 'rps'
+        newRules = rulesRPS
+        
+    newValidMoves = getValidMoves(newRules)
+        
+    return (newMode, newValidMoves, newRules)
     
 # INIT
 printTitle()
-kill = False
-response = None
-
-modes = ('rps', 'rpsls')
-rulesRPS = [
-    ('rock', 'crushes', 'scissors'),
-    ('paper', 'covers', 'rock'),
-    ('scissors', 'cuts', 'paper')
-]
-
-rulesRPSLS = [
-    ('rock', 'crushes', 'scissors'),
-    ('paper', 'covers', 'rock'),
-    ('scissors', 'cuts', 'paper'),
-    ('lizard', 'poisons', 'spock'),
-    ('spock', 'smashes', 'scissors'),
-    ('rock', 'crushes', 'lizard'),
-    ('scissors', 'decapitates', 'lizard'),
-    ('lizard', 'eats', 'paper'),
-    ('paper', 'disproves', 'spock'),
-    ('spock', 'vaporizes', 'rock')
-]
 
 validMoves = getValidMoves(rulesRPS)
+rules = rulesRPS
     
 def validateInput(input):
     valid = False
@@ -82,6 +106,9 @@ def validateInput(input):
     if input in quitStrings:
         valid = True
     elif input in validMoves:
+        valid = True
+        
+    if input == "mode":
         valid = True
         
     return valid 
@@ -94,10 +121,14 @@ while not kill:
     response = inputToLower()
     while not validateInput(response):
         printTitle()
-        paddedPrint(response + " is not a valid move or command.  Please try again.")
+        paddedPrint("'" + response + "'" + " is not a valid move or command.  Please try again.\n")
+        printPrompt()
         response = inputToLower()
         
     if response in quitStrings:
         kill = True
         printTitle()
         paddedPrint ("I ALREADY MISS YOU.\n")
+        
+    if response == 'mode':
+        mode, validMoves, rules = switchModes(mode)
