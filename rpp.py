@@ -1,4 +1,4 @@
-import os
+import os, random
 
 pad = "    "
 quitStrings = ["exit", "quit", "q"]
@@ -52,10 +52,14 @@ def printTitle():
     """)
 
 def inputToLower():
-    return str.lower(input('    '))
+    return str.lower(input(pad))
     
 def printResults():
-    paddedPrint ("You responded " + response + "\n")
+    paddedPrint("You chose '" + response + "'")
+    if computerMove:
+        paddedPrint("The computer chose '" + computerMove + ".'")
+        
+    print ('')
     
 def getValidMoves(rules):
     validMoves = []
@@ -66,17 +70,14 @@ def getValidMoves(rules):
     return validMoves
     
 def printPrompt():
-    if response and validateInput(response) and not kill:
-        printResults()
-    
     if mode == 'rps':
-        paddedPrint ("You are playing 'Rock, Paper, Scissors.'")
+        paddedPrint("You are playing 'Rock, Paper, Scissors.'")
     elif mode == 'rpsls':
-        paddedPrint ("You are playing 'Rock, Paper, Scissors, Lizard, Spock.'")
+        paddedPrint("You are playing 'Rock, Paper, Scissors, Lizard, Spock.'")
     else:
-        paddedPrint ("I'm not sure what you're doing.")
+        paddedPrint("I'm not sure what you're doing.")
         
-    paddedPrint ("Please enter your move, or 'mode' to switch modes.")
+    paddedPrint("Please enter your move, or 'mode' to switch modes.")
     
 def switchModes(currentMode):
     newMode = None
@@ -94,11 +95,26 @@ def switchModes(currentMode):
         
     return (newMode, newValidMoves, newRules)
     
+def getMatchResults(resp, comp, rules):
+    if resp == comp:
+        return (None, None)
+    
+    for rule in rules:
+        victor, v, loser = rule
+        if resp == victor and comp == loser:
+            return ("player", v)
+        elif resp == loser and comp == victor:
+            return ("computer", v)
+    
 # INIT
-printTitle()
-
-validMoves = getValidMoves(rulesRPS)
-rules = rulesRPS
+currentRules = rulesRPS
+validMoves = getValidMoves(currentRules)
+winner = None
+verb = None
+results = None
+scores = dict({"player": 0, "computer": 0, "draws": 0})
+matchList = []
+matchId = 0
     
 def validateInput(input):
     valid = False
@@ -116,8 +132,15 @@ def validateInput(input):
 # START
 while not kill:
     printTitle()
+    
+    if response and response != "mode":
+        printResults()
+
+    if results:
+        paddedPrint(results)
+    
     printPrompt()
-        
+    
     response = inputToLower()
     while not validateInput(response):
         printTitle()
@@ -128,7 +151,24 @@ while not kill:
     if response in quitStrings:
         kill = True
         printTitle()
-        paddedPrint ("I ALREADY MISS YOU.\n")
+        paddedPrint("I ALREADY MISS YOU.\n")
+        break
         
-    if response == 'mode':
-        mode, validMoves, rules = switchModes(mode)
+    if response == "mode":
+        results = None
+        mode, validMoves, currentRules = switchModes(mode)
+    else:
+        computerMove = random.choice(validMoves)
+        winner, verb = getMatchResults(response, computerMove, currentRules)
+        
+        if not winner:
+            results = "Both picked '" + response + ",' so it was a draw!!!"
+            scores["draws"] += 1
+        elif winner == "player":
+            results = "You won, " + response + " " + verb + " " + computerMove + "!!!"
+            scores["player"] += 1
+        else:
+            results = "You lost, " + computerMove + " " + verb + " " + response + "!!!"
+            scores["computer"] += 1
+            
+        matchId += 1
