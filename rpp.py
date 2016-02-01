@@ -167,8 +167,12 @@ while not kill:
         elif winner == "player":
             results = "You won, " + response + " " + verb + " " + computerMove + "!!!"
             scores["player"] += 1
+            if mode == "rpsls" and response == "rock" and computerMove == "scissors":
+                results = results + " (... as it always has)"
         else:
             results = "You lost, " + computerMove + " " + verb + " " + response + "!!!"
             scores["computer"] += 1
+            if mode == "rpsls" and computerMove == "rock" and response == "scissors":
+                results = results + " (... as it always has)"
             
         matchId += 1
