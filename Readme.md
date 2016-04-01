@@ -10,3 +10,6 @@
 * Paper disproves Spock
 * Spock vaporizes Rock
 * (and as it always has) Rock crushes Scissors
+
+
+[Here is the ascii converter I landed on](http://patorjk.com/software/taag/#p=display&f=Colossal&t=Rock%2C%20Paper%2C%20etc).  I love it.
